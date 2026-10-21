@@ -1,0 +1,5 @@
+node_modules/
+*.map
+
+# Unused character renders (no longer on the site)
+assets/characters/

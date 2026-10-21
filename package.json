@@ -1,0 +1,16 @@
+{
+  "name": "advantages-of-age-website",
+  "version": "1.0.0",
+  "description": "Advantages of Age website (React)",
+  "scripts": {
+    "pages": "node scripts/pages.mjs",
+    "build": "node scripts/pages.mjs && esbuild src/main.jsx --bundle --minify --target=es2018 --define:process.env.NODE_ENV=\\\"production\\\" --outfile=js/app.js",
+    "dev": "esbuild src/main.jsx --bundle --sourcemap --define:process.env.NODE_ENV=\\\"development\\\" --outfile=js/app.js --watch=forever --servedir=. --serve=8080"
+  },
+  "dependencies": {
+    "esbuild": "^0.23.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "private": true
+}
