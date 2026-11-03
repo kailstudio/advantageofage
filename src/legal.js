@@ -240,3 +240,28 @@ export const TERMS = [
   { p: `6) Termination: I may request termination of this agreement at any time. Termination will take effect upon the end of the last day of my billing cycle. ${AoA} may terminate this agreement at will. In the event ${AoA} terminates this agreement early, and I am not in violation of any term of this Agreement, I will receive a prorated reimbursement for the portion of the billing cycle remaining.` },
   { p: "End Agreement." },
 ];
+
+// Draft accessibility statement — review with Advantages of Age before launch,
+// and update the "Last reviewed" date whenever the site is re-tested.
+export const ACCESSIBILITY = [
+  "Advantages of Age is for people 50 and over, and we want everyone to be able to use this website comfortably — whatever device you use and however you browse.",
+  { h: "Our aim" },
+  "We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA. We are still working towards this, and we test and improve the site as it grows.",
+  { h: "What we've done so far" },
+  { list: [
+    "Text can be resized and the layout adapts to phones, tablets and desktop screens.",
+    "Every page can be used with a keyboard, and there is a \"Skip to content\" link at the top.",
+    "Animations are turned off if your device is set to reduce motion.",
+    "Images that carry meaning have text descriptions, and links that open another website are labelled.",
+    "Forms have visible labels and clear error messages.",
+  ] },
+  { h: "Known limitations" },
+  { list: [
+    "Some listings, articles and photos are added by members, so their descriptions may vary.",
+    "The magazine and newsletter are hosted on Substack, which has its own accessibility approach.",
+  ] },
+  { h: "Tell us about a problem" },
+  "If something on this website is hard to use, or you need information in a different format, please get in touch at hello@advantagesofage.com or through our contact page. We aim to reply within two working days.",
+  { h: "Last reviewed" },
+  "This statement was last reviewed in November 2026.",
+];

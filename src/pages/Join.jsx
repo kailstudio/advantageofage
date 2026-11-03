@@ -7,7 +7,7 @@ function Plan({ plan }) {
   const t = plan.toggle ? plan.toggle[opt] : null;
   const price = t ? t.price : plan.price;
   return (
-    <article className={`plan ${plan.badge ? "plan--featured" : ""}`} data-reveal>
+    <article id={plan.id} className={`plan ${plan.badge ? "plan--featured" : ""}`}>
       <div className="plan__head">
         <h2 className="h3">{plan.name}</h2>
         {plan.badge && <span className="plan__badge"><Icon name="sparkle" size={14} /> {plan.badge}</span>}
@@ -72,10 +72,10 @@ export default function Join() {
           <p className="fineprint center">{JOIN.fine}</p>
         </div>
       </section>
-      <section className="section section--last">
+      <section className="section section--last" id="faq">
         <div className="container">
           <div className="faq-wrap">
-            <div data-reveal>
+            <div>
               <h2 className="h2">Frequently asked <em>questions</em></h2>
               <div className="faq-wrap__media">
                 <img className="faq-wrap__img" src="assets/img/caroline-sam.jpg" alt="" loading="lazy" />

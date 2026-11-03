@@ -2,32 +2,12 @@ import React, { useMemo, useState } from "react";
 import { LISTINGS, DIRECTORY_SIDEBAR as S, JOIN_PLANS } from "../data.js";
 import { Layout, PageHero, Button, Icon, Avatar, NewsletterModal } from "../components.jsx";
 
-const CONFIG = {
-  members: {
-    title: "Individual & Ambassadors",
-    accent: "Directory",
-    crumb: "AofA Members",
-    filter: (l) => l.type === "member",
-    img: "assets/img/three-friends.jpg",
-    tone: "turq",
-  },
-  organisations: {
-    title: "Organisations",
-    accent: "Directory",
-    crumb: "AofA Organisations",
-    filter: (l) => l.type === "organisation",
-    img: "assets/img/joint-winners.jpg",
-    tone: "pink",
-  },
-  search: {
-    title: "Member",
-    accent: "Directory",
-    crumb: "Search",
-    filter: () => true,
-    img: "assets/img/conference-trio.jpg",
-    tone: "lime",
-  },
-};
+// One directory, three tabs. ?type= keeps each tab shareable.
+const TABS = [
+  { id: "all", label: "All listings", filter: () => true },
+  { id: "members", label: "Members & Ambassadors", filter: (l) => l.type === "member" },
+  { id: "organisations", label: "Organisations", filter: (l) => l.type === "organisation" },
+];
 
 const lastName = (n) => n.split(" ").slice(-1)[0];
 
@@ -45,7 +25,7 @@ function sortListings(list, sort) {
 export function ResultRow({ l }) {
   const href = `profile.html?id=${l.slug}`;
   return (
-    <article className="result" data-reveal>
+    <article className="result">
       <a href={href} className="result__avatar" tabIndex={-1} aria-hidden="true">
         <Avatar listing={l} size={96} />
       </a>
@@ -129,32 +109,57 @@ export function Sidebar({ searchTitle = S.searchTitle, query, setQuery, place, s
   );
 }
 
-export default function Directory({ kind }) {
-  const cfg = CONFIG[kind];
+export default function Directory() {
   const params = new URLSearchParams(window.location.search);
+  const initial = TABS.some((t) => t.id === params.get("type")) ? params.get("type") : "all";
+  const [type, setType] = useState(initial);
   const [query, setQuery] = useState(params.get("q") || "");
   const [place, setPlace] = useState(params.get("where") || "");
   const [sort, setSort] = useState("");
   const [nl, setNl] = useState(false);
 
-  const results = useMemo(() => {
+  const pickTab = (id) => {
+    setType(id);
+    const u = new URL(window.location.href);
+    u.searchParams.set("type", id);
+    window.history.replaceState(null, "", u.pathname.split("/").pop() + u.search);
+  };
+
+  const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
     const p = place.trim().toLowerCase();
-    const base = LISTINGS.filter(cfg.filter).filter((l) => {
+    return LISTINGS.filter((l) => {
       const hay = [l.name, l.company, l.summary, l.tagline, ...(l.about || []).map((b) => (typeof b === "string" ? b : ""))].join(" ").toLowerCase();
       return (!q || hay.includes(q)) && (!p || (l.location || "").toLowerCase().includes(p));
     });
-    return sortListings(base, sort);
-  }, [query, place, sort, kind]);
+  }, [query, place]);
+
+  const tab = TABS.find((t) => t.id === type);
+  const results = useMemo(() => sortListings(matches.filter(tab.filter), sort), [matches, type, sort]);
 
   return (
-    <Layout page={kind === "search" ? null : kind}>
-      <PageHero title={cfg.title} accent={cfg.accent} crumbs={[{ label: cfg.crumb }]} img={cfg.img} tone={cfg.tone} />
+    <Layout page="directory">
+      <PageHero
+        title="The AofA"
+        accent="Directory"
+        sub="Members, Ambassadors and organisations rethinking ageing — all in one place."
+        crumbs={[{ label: "Directory" }]}
+        img="assets/img/three-friends.jpg"
+        tone="turq"
+      />
       <section className="section section--tight">
         <div className="container">
           <div className="dir">
             <Sidebar query={query} setQuery={setQuery} place={place} setPlace={setPlace} onNewsletter={() => setNl(true)} />
             <div className="dir__results">
+              <div className="dir-tabs" role="group" aria-label="Show listings">
+                {TABS.map((t) => (
+                  <button key={t.id} type="button" aria-pressed={t.id === type} className={t.id === type ? "is-active" : ""} onClick={() => pickTab(t.id)}>
+                    {t.label}
+                    <span className="dir-tabs__count">{matches.filter(t.filter).length}</span>
+                  </button>
+                ))}
+              </div>
               <div className="toolbar">
                 <p className="toolbar__count" aria-live="polite">
                   Showing {results.length ? 1 : 0} - {results.length} of {results.length} Results
@@ -187,33 +192,20 @@ export default function Directory({ kind }) {
   );
 }
 
-/* Events + Resource Hub share the empty-state directory layout */
-export function EmptyDirectory({ kind }) {
+/* Resource Hub keeps the empty-state directory layout until it has guides */
+export function EmptyDirectory() {
   const [nl, setNl] = useState(false);
   const [query, setQuery] = useState("");
-  const [place, setPlace] = useState("");
-  const isEvents = kind === "events";
   return (
-    <Layout page={kind}>
-      <PageHero
-        title={isEvents ? "Upcoming Events" : "Resource"}
-        accent={isEvents ? "& Activities" : "Hub"}
-        crumbs={[{ label: isEvents ? "Events" : "Resource Hub" }]}
-        img={isEvents ? "assets/img/awards-stage.jpg" : "assets/img/conference-hall.jpg"}
-        tone={isEvents ? "blue" : "lime"}
-      />
+    <Layout page="resource-hub">
+      <PageHero title="Resource" accent="Hub" crumbs={[{ label: "Magazine" }, { label: "Resource Hub" }]} img="assets/img/conference-hall.jpg" tone="lime" />
       <section className="section section--tight">
         <div className="container">
           <div className="dir">
-            <Sidebar
-              searchTitle={isEvents ? "Event Search" : "Resource Hub Search"}
-              fields={isEvents ? "events" : "keyword"}
-              query={query} setQuery={setQuery} place={place} setPlace={setPlace}
-              onNewsletter={() => setNl(true)}
-            />
+            <Sidebar searchTitle="Resource Hub Search" fields="keyword" query={query} setQuery={setQuery} onNewsletter={() => setNl(true)} />
             <div className="dir__results">
               <div className="empty empty--big">
-                <span className="empty__icon"><Icon name={isEvents ? "calendar" : "book"} size={30} /></span>
+                <span className="empty__icon"><Icon name="book" size={30} /></span>
                 <p className="h4">Sorry, we did not find any results for your search.</p>
               </div>
             </div>

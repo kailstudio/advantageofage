@@ -1,15 +1,20 @@
 import React from "react";
-import { PRIVACY, TERMS } from "../legal.js";
+import { PRIVACY, TERMS, ACCESSIBILITY } from "../legal.js";
 import { Layout, PageHero, RichBlocks } from "../components.jsx";
 
 export default function Legal({ kind }) {
-  const isPrivacy = kind === "privacy";
-  const blocks = isPrivacy ? PRIVACY : TERMS;
+  const KINDS = {
+    privacy: { blocks: PRIVACY, title: "Privacy", accent: "Policy", crumb: "Privacy Policy" },
+    terms: { blocks: TERMS, title: "Terms of", accent: "Use", crumb: "Terms of Use" },
+    accessibility: { blocks: ACCESSIBILITY, title: "Accessibility", accent: "statement", crumb: "Accessibility" },
+  };
+  const k = KINDS[kind];
+  const blocks = k.blocks;
   const toc = blocks.filter((b) => b.h).map((b) => b.h);
   const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   return (
     <Layout page={kind}>
-      <PageHero eyebrow="Advantages of Age" title={isPrivacy ? "Privacy" : "Terms of"} accent={isPrivacy ? "Policy" : "Use"} crumbs={[{ label: isPrivacy ? "Privacy Policy" : "Terms of Use" }]} tone="blue" />
+      <PageHero eyebrow="Advantages of Age" title={k.title} accent={k.accent} crumbs={[{ label: k.crumb }]} tone="blue" />
       <section className="section section--last">
         <div className="container">
           <div className="legal">

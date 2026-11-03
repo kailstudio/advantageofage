@@ -49,12 +49,12 @@ export default function Profile() {
 
   if (!l) {
     return (
-      <Layout>
+      <Layout page="profile">
         <section className="section">
           <div className="container narrow">
             <div className="empty empty--big">
               <p className="h3">Listing not found</p>
-              <Button href="search.html" variant="dark">Browse the directory</Button>
+              <Button href="directory.html" variant="dark">Browse the directory</Button>
             </div>
           </div>
         </section>
@@ -64,10 +64,10 @@ export default function Profile() {
 
   document.title = `${l.name} — ${l.category} | Advantages of Age`;
   const isOrg = l.type === "organisation";
-  const listHref = isOrg ? "organisations.html" : "members.html";
+  const listHref = `directory.html?type=${isOrg ? "organisations" : "members"}`;
 
   return (
-    <Layout page={isOrg ? "organisations" : "members"}>
+    <Layout page="profile">
       <section className="profile-hero">
         <div className="container">
           <div className={`profile-hero__card ${isOrg ? "is-org" : ""}`}>

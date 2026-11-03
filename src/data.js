@@ -2,47 +2,126 @@
 // Edit content here — every page reads from this file.
 
 export const LINKS = {
-  magazine: "https://advantagesofage.substack.com/",
-  magazineHome: "https://www.advantagesofage.com/",
+  // One canonical URL for the magazine (the Substack lives on this custom domain)
+  magazine: "https://www.advantagesofage.com/",
   facebookGroup: "https://www.facebook.com/groups/advantagesofage/",
   facebook: "https://facebook.com/advantagesofage",
   twitter: "https://twitter.com/advantagesofage",
   linkedin: "https://www.linkedin.com/advantagesofage",
   youtube: "https://youtube.com/@advantagesofage",
   instagram: "https://instagram.com/advantagesofage",
-  substack: "https://advantagesofage.substack.com",
   email: "hello@advantagesofage.com",
-};
-
-export const NAV = [
-  { label: "Home", href: "index.html", page: "home" },
-  { label: "Search AofA Members", href: "members.html", page: "members" },
-  { label: "Search Organisations", href: "organisations.html", page: "organisations" },
-  { label: "Events", href: "events.html", page: "events" },
-  { label: "About Us", href: "about.html", page: "about" },
-  { label: "AofA Magazine", href: LINKS.magazine, external: true },
-];
-
-export const FOOTER = {
-  about:
-    "Advantages of Age challenges ageist stereotypes and rethinks what it means to grow older. Founded by Suzanne Noble and Rose Rouse, it celebrates older people doing life their own way.",
-  website: [
-    { label: "About Us", href: "about.html" },
-    { label: "Events", href: "events.html" },
-    { label: "Resource Hub", href: "resource-hub.html" },
-    { label: "Search", href: "search.html" },
-    { label: "AofA Organisations", href: "organisations.html" },
-    { label: "AofA Members", href: "members.html" },
-  ],
-  support: [
-    { label: "Manage Account", href: "login.html" },
-    { label: "Reset Password", href: "reset-password.html" },
-    { label: "Contact Us", href: "contact.html" },
-  ],
 };
 
 export const JOIN_FREE = "signup.html?plan=individuals";
 export const JOIN_PLANS = "join.html";
+export const JOIN_AMBASSADOR = "join.html#ambassador";
+export const JOIN_ORGS = "join.html#organisations";
+export const JOIN_FAQ = "join.html#faq";
+
+// Flip to true once the Resource Hub has guides in it — it then appears under Magazine.
+export const SHOW_RESOURCE_HUB = false;
+
+/* Main menu — matches the proposed sitemap (Studio KAIL, Oct 2026).
+   `page` is the menu section; PAGE_SECTION maps each page to its section.
+   A child with `action: "newsletter"` opens the newsletter sign-up modal. */
+export const NAV = [
+  {
+    label: "Directory", href: "directory.html", page: "directory",
+    children: [
+      { label: "All listings", href: "directory.html?type=all" },
+      { label: "Members & Ambassadors", href: "directory.html?type=members" },
+      { label: "Organisations", href: "directory.html?type=organisations" },
+    ],
+  },
+  {
+    label: "What's On", href: "events.html", page: "whats-on",
+    children: [
+      { label: "Events & activities", href: "events.html" },
+      { label: "AofA Awards", href: "awards.html" },
+      { label: "AofA Conference", href: "conference.html" },
+    ],
+  },
+  {
+    label: "Magazine", page: "magazine",
+    children: [
+      { label: "Read the Magazine", href: LINKS.magazine, external: true },
+      { label: "Newsletter sign-up", action: "newsletter" },
+      { label: "Resource Hub", href: "resource-hub.html", hidden: !SHOW_RESOURCE_HUB },
+    ],
+  },
+  {
+    label: "About", href: "about.html", page: "about",
+    children: [
+      { label: "Our story & founders", href: "about.html" },
+      { label: "Press & partnerships", href: "about.html#press" },
+      { label: "Contact", href: "contact.html" },
+    ],
+  },
+  {
+    label: "Membership", href: JOIN_PLANS, page: "membership",
+    children: [
+      { label: "Plans & pricing", href: JOIN_PLANS },
+      { label: "Become an Ambassador", href: JOIN_AMBASSADOR },
+      { label: "List your organisation", href: JOIN_ORGS },
+      { label: "FAQs", href: JOIN_FAQ },
+    ],
+  },
+];
+
+export const PAGE_SECTION = {
+  directory: "directory",
+  profile: "directory",
+  events: "whats-on",
+  awards: "whats-on",
+  conference: "whats-on",
+  "resource-hub": "magazine",
+  about: "about",
+  contact: "about",
+  join: "membership",
+};
+
+export const FOOTER = {
+  about:
+    "Advantages of Age challenges ageist stereotypes and rethinks what it means to grow older. Founded by Suzanne Noble and Rose Rouse, it celebrates older people doing life their own way.",
+  columns: [
+    {
+      title: "Explore",
+      links: [
+        { label: "Directory", href: "directory.html" },
+        { label: "What's On", href: "events.html" },
+        { label: "Awards", href: "awards.html" },
+        { label: "Conference", href: "conference.html" },
+        { label: "Magazine", href: LINKS.magazine, external: true },
+      ],
+    },
+    {
+      title: "Membership",
+      links: [
+        { label: "Plans & pricing", href: JOIN_PLANS },
+        { label: "Become an Ambassador", href: JOIN_AMBASSADOR },
+        { label: "List your organisation", href: JOIN_ORGS },
+        { label: "FAQs", href: JOIN_FAQ },
+      ],
+    },
+    {
+      title: "Support",
+      links: [
+        { label: "Contact us", href: "contact.html" },
+        { label: "Log in / My account", href: "login.html" },
+        { label: "Newsletter", action: "newsletter" },
+      ],
+    },
+    {
+      title: "Legal",
+      links: [
+        { label: "Privacy Policy", href: "privacy.html" },
+        { label: "Terms of Use", href: "terms.html" },
+        { label: "Accessibility", href: "accessibility.html" },
+      ],
+    },
+  ],
+};
 
 /* ------------------------------------------------------------------ HOME */
 
@@ -59,9 +138,9 @@ export const HOME = {
     sub: "Whether you're rethinking ageing for yourself or for an organisation, find your way in.",
     items: [
       { title: "Free Members", body: "Discover people, activities, articles, events, and weekly updates from across the community.", cta: "Join Free", href: JOIN_FREE, tone: "turq" },
-      { title: "AofA Ambassadors", body: "Build a profile, be discovered, and host Advantages of Age events.", cta: "Become an Ambassador", href: JOIN_PLANS, tone: "pink" },
-      { title: "Not-for-Profit Organisations", body: "List your organisation and activities for an engaged age-positive audience.", cta: "List your Organisation", href: JOIN_PLANS, tone: "lime" },
-      { title: "Commercial Organisations", body: "Promote your services, events, or expertise to people 50+ looking for relevant offers.", cta: "List your Organisation", href: JOIN_PLANS, tone: "blue" },
+      { title: "AofA Ambassadors", body: "Build a profile, be discovered, and host Advantages of Age events.", cta: "Become an Ambassador", href: JOIN_AMBASSADOR, tone: "pink" },
+      { title: "Not-for-Profit Organisations", body: "List your organisation and activities for an engaged age-positive audience.", cta: "List your Organisation", href: JOIN_ORGS, tone: "lime" },
+      { title: "Commercial Organisations", body: "Promote your services, events, or expertise to people 50+ looking for relevant offers.", cta: "List your Organisation", href: JOIN_ORGS, tone: "blue" },
     ],
   },
   how: {
@@ -99,8 +178,8 @@ export const HOME = {
     title: "Awards and Conference",
     sub: "Two moments that bring the community together to celebrate, challenge, and rethink later life.",
     items: [
-      { title: "Advantages of Age Awards", body: "Our awards celebrate the people and organisations challenging outdated ideas about ageing.", img: "assets/img/awards-orange.jpg" },
-      { title: "AofA Conference", date: "10 October 2026", body: "Our first conference brings together ideas, visibility, and collaboration across later life.", img: "assets/img/conference-trio.jpg" },
+      { title: "Advantages of Age Awards", body: "Our awards celebrate the people and organisations challenging outdated ideas about ageing.", img: "assets/img/brand/awards-singing.jpg", href: "awards.html", cta: "About the Awards" },
+      { title: "AofA Conference", date: "10 October 2026", body: "Our first conference brought together ideas, visibility, and collaboration across later life.", img: "assets/img/conference-trio.jpg", href: "conference.html", cta: "About the Conference" },
     ],
   },
   why: {
@@ -147,7 +226,7 @@ export const NEWSLETTER_MODAL = {
 /* ------------------------------------------------------------- DIRECTORY */
 
 export const DIRECTORY_SIDEBAR = {
-  searchTitle: "Find Members",
+  searchTitle: "Search the Directory",
   what: "What do you need:",
   where: "Search by location:",
   newsletter: { title: "Join Our Newsletter", cta: "Click to Subscribe" },
@@ -573,6 +652,62 @@ export const JOIN = {
     ["Is Advantages of Age UK-only?", "We are based in the UK and most of our community and events are here, but anyone aged 50+ from anywhere in the world is welcome to join."],
     ["What happens after I sign up?", "You will get a welcome email with login details and a short walkthrough of how to set up your profile, publish your first piece of content, or list your first event."],
   ],
+};
+
+/* ------------------------------------------------------------- WHAT'S ON */
+
+// Add events here as { title, date, time, location, body, href } — the Events page
+// shows a holding message while this list is empty.
+export const EVENTS = [];
+
+export const WHATS_ON = {
+  eyebrow: "What's On",
+  sub: "Events, activities and the flagship AofA moments that bring the community together.",
+  emptyTitle: "New events are on their way",
+  emptyBody: "Ambassadors and organisations can list their own events here. Get the weekly newsletter to hear about new events first.",
+  flagshipTitle: "Flagship moments",
+  flagshipSub: "Two moments that bring the community together to celebrate, challenge, and rethink later life.",
+};
+
+export const AWARDS = {
+  eyebrow: "AofA Awards",
+  body: "Our awards celebrate the people and organisations challenging outdated ideas about ageing.",
+  gallery: [
+    { img: "assets/img/awards-stage.jpg", alt: "The Advantages of Age Awards stage" },
+    { img: "assets/img/joint-winners.jpg", alt: "Joint award winners on stage" },
+    { img: "assets/img/sports-god.jpg", alt: "An award winner on stage" },
+    { img: "assets/img/suzanne-awards.jpg", alt: "Suzanne Noble at the awards" },
+  ],
+  // Add winners as { name, category, year } — shown as cards once populated.
+  winners: [],
+  winnersTitle: "Winners",
+  winnersEmpty: "Winners and photos from past ceremonies will be added here.",
+  ctaTitle: "Hear when nominations open",
+  ctaBody: "Get the weekly newsletter to find out when nominations open and how to put someone forward.",
+};
+
+export const CONFERENCE = {
+  eyebrow: "AofA Conference",
+  date: "10 October 2026",
+  body: "Our first conference brought together ideas, visibility, and collaboration across later life.",
+  gallery: [
+    { img: "assets/img/conference-hall.jpg", alt: "The conference hall" },
+    { img: "assets/img/conference-stage.jpg", alt: "Speakers on the conference stage" },
+    { img: "assets/img/conference-crowd.jpg", alt: "The conference audience" },
+  ],
+  // Paragraphs for the 2026 recap — a holding line shows while this is empty.
+  recap: [],
+  recapTitle: "2026 recap",
+  recapEmpty: "A recap of the 2026 conference, with photos and highlights, is on its way.",
+  interestTitle: "Register interest for the next conference",
+  interestBody: "Leave your details and we'll let you know when the next AofA Conference is announced.",
+  interestAs: ["Attending", "Speaking", "Sponsoring or partnering"],
+};
+
+export const NOT_FOUND = {
+  title: "We can't find",
+  accent: "that page",
+  body: "The link may be broken or the page may have moved. Try one of these instead.",
 };
 
 export const SIGNUP = {

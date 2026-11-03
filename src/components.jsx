@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { NAV, FOOTER, LINKS, JOIN_FREE, NEWSLETTER_MODAL, LISTINGS } from "./data.js";
+import { NAV, PAGE_SECTION, FOOTER, LINKS, JOIN_FREE, NEWSLETTER_MODAL, LISTINGS } from "./data.js";
 
 /* ------------------------------------------------------------------ Icons */
 
 const paths = {
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+  chevron: <path d="m6 9 6 6 6-6" />,
   arrowUpRight: <path d="M7 17 17 7M8 7h9v9" />,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
   x: <path d="M6 6l12 12M18 6 6 18" />,
@@ -110,9 +111,9 @@ export function Chip({ children, tone = "light", dot }) {
 
 export function SectionHead({ eyebrow, title, sub, align = "left", action }) {
   return (
-    <div className={`section-head section-head--${align}`} data-reveal>
+    <div className={`section-head section-head--${align}`}>
       <div>
-        {eyebrow && <Chip dot="var(--turq)">{eyebrow}</Chip>}
+        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h2 className="h2">{title}</h2>
         {sub && <p className="lead">{sub}</p>}
       </div>
@@ -144,86 +145,97 @@ export function Avatar({ listing, size = 72, className = "" }) {
   );
 }
 
-let badgeId = 0;
-export function RotatingBadge({ src = "assets/logo/badge-white.png", className = "", text = "Age with attitude • Advantages of Age • " }) {
-  const [id] = useState(() => `ring-${++badgeId}`);
+/* The rotating badge and sticker labels were retired with brandbook v4
+   (no decorative motion or floating flourishes). Kept as no-ops so older
+   markup doesn't break. */
+export function RotatingBadge() { return null; }
+export function Sticker() { return null; }
+
+/* ---------------------------------------------------------------- Header */
+
+const visible = (items = []) => items.filter((c) => !c.hidden);
+const extProps = (l) => (l.external ? { target: "_blank", rel: "noopener noreferrer" } : {});
+const isCurrent = (href) => {
+  if (!href || /^https?:/.test(href)) return false;
+  const here = location.pathname.split("/").pop() || "index.html";
+  const [file, rest = ""] = href.split(/(?=[?#])/);
+  if (file !== here) return false;
+  if (rest.startsWith("?")) return location.search === rest.split("#")[0] || (rest === "?type=all" && !location.search);
+  if (rest.startsWith("#")) return location.hash === rest;
+  return !location.hash && (!location.search || here !== "directory.html" || location.search === "?type=all");
+};
+
+/* One link in a menu: an internal page, an external site, or the newsletter modal */
+export function MenuLink({ item, onNewsletter, onPick, className = "" }) {
+  if (item.action === "newsletter") {
+    return (
+      <button type="button" className={className} onClick={() => { onPick && onPick(); onNewsletter && onNewsletter(); }}>
+        <span>{item.label}</span>
+        <Icon name="mail" size={16} />
+      </button>
+    );
+  }
+  const current = isCurrent(item.href);
   return (
-    <div className={`rotating-badge ${className}`} aria-hidden="true">
-      <svg className="rotating-badge__ring" viewBox="0 0 200 200">
-        <defs>
-          <path id={id} d="M100,100 m-82,0 a82,82 0 1,1 164,0 a82,82 0 1,1 -164,0" />
-        </defs>
-        <text textLength="512" lengthAdjust="spacing">
-          <textPath href={`#${id}`} startOffset="0">{text}</textPath>
-        </text>
-      </svg>
-      <img src={src} alt="" />
+    <a href={item.href} className={`${className} ${current ? "is-current" : ""}`} aria-current={current ? "page" : undefined} onClick={onPick} {...extProps(item)}>
+      <span>{item.label}</span>
+      {item.external && <><Icon name="arrowUpRight" size={14} stroke={2} /><span className="sr-only"> (opens in a new tab)</span></>}
+    </a>
+  );
+}
+
+function NavItem({ item, active, onNewsletter }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const id = `menu-${item.page}`;
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => ref.current && !ref.current.contains(e.target) && setOpen(false);
+    const onKey = (e) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      ref.current?.querySelector(".nav-toggle")?.focus();
+    };
+    document.addEventListener("pointerdown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  return (
+    <div
+      ref={ref}
+      className={`nav-item ${active ? "is-active" : ""} ${open ? "is-open" : ""}`}
+      onBlur={(e) => ref.current && !ref.current.contains(e.relatedTarget) && setOpen(false)}
+    >
+      {item.href && (
+        <a className="nav-link" href={item.href} aria-current={active ? "true" : undefined}>{item.label}</a>
+      )}
+      <button
+        type="button"
+        className={`nav-toggle ${item.href ? "" : "nav-toggle--label"}`}
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen(!open)}
+      >
+        {item.href ? <span className="sr-only">{item.label} menu</span> : item.label}
+        <Icon name="chevron" size={15} stroke={2.2} />
+      </button>
+      <div className="nav-menu" id={id} hidden={!open}>
+        {visible(item.children).map((c) => (
+          <MenuLink key={c.label} item={c} onNewsletter={onNewsletter} onPick={() => setOpen(false)} />
+        ))}
+      </div>
     </div>
   );
 }
 
-/* Sticker labels and speech bubbles that float around headlines */
-export function Sticker({ children, tone = "lime", tilt = -4, className = "", bubble, cursor, style }) {
-  return (
-    <span className={`sticker sticker--${tone} ${bubble ? "sticker--bubble" : ""} ${className}`} style={{ "--tilt": `${tilt}deg`, ...style }} aria-hidden="true">
-      {children}
-      {cursor && <span className="sticker__cursor"><Icon name="cursor" size={22} stroke={0} /></span>}
-    </span>
-  );
-}
-
-/* ----------------------------------------------------------- Reveal hook */
-
-export function useReveal() {
-  useEffect(() => {
-    const els = document.querySelectorAll("[data-reveal]:not(.is-in)");
-    if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      els.forEach((el) => el.classList.add("is-in"));
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("is-in");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  });
-}
-
-/* -------------------------------------------- Pointer spotlight on cards */
-
-const SPOT = ".spot, .listing-card, .article, .pathway, .feature, .step, .result, .plan, .side-card, .help, .principle, .founder, .faq__item, .panel, .why__list li, .moment__panel, .connected, .bento-tile--turq";
-export function useSpotlight() {
-  useEffect(() => {
-    if (window.matchMedia("(hover: none)").matches) return;
-    let raf = 0;
-    const onMove = (e) => {
-      const el = e.target.closest && e.target.closest(SPOT);
-      if (!el) return;
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const r = el.getBoundingClientRect();
-        el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-        el.style.setProperty("--my", `${e.clientY - r.top}px`);
-      });
-    };
-    document.addEventListener("pointermove", onMove, { passive: true });
-    return () => document.removeEventListener("pointermove", onMove);
-  }, []);
-}
-
-/* ---------------------------------------------------------------- Header */
-
-export function Header({ page }) {
+export function Header({ page, onNewsletter }) {
   const [open, setOpen] = useState(false);
+  const [group, setGroup] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  const section = PAGE_SECTION[page];
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
@@ -232,6 +244,7 @@ export function Header({ page }) {
   }, []);
   useEffect(() => {
     document.body.classList.toggle("menu-open", open);
+    if (open) setGroup(section || null);
     const onKey = (e) => e.key === "Escape" && setOpen(false);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -243,14 +256,11 @@ export function Header({ page }) {
       <div className="container">
         <div className="nav-bar">
           <a className="brand" href="index.html" aria-label="Advantages of Age — home">
-            <img src="assets/logo/aoa-charcoal.png" alt="Advantages of Age" width="168" height="63" />
+            <img src="assets/logo/aoa-turquoise.png" alt="Advantages of Age" width="168" height="63" />
           </a>
           <nav className="nav-links" aria-label="Main">
             {NAV.map((n) => (
-              <a key={n.label} href={n.href} className={`nav-link ${n.page === page ? "is-active" : ""}`} aria-current={n.page === page ? "page" : undefined} {...(n.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
-                {n.label}
-                {n.external && <Icon name="arrowUpRight" size={13} stroke={2} />}
-              </a>
+              <NavItem key={n.page} item={n} active={n.page === section} onNewsletter={onNewsletter} />
             ))}
           </nav>
           <div className="nav-actions">
@@ -268,12 +278,22 @@ export function Header({ page }) {
       </div>
       <div id="mobile-menu" className={`mobile-menu ${open ? "is-open" : ""}`} hidden={!open}>
         <nav aria-label="Mobile">
-          {NAV.map((n, i) => (
-            <a key={n.label} href={n.href} style={{ transitionDelay: `${i * 30}ms` }} className={n.page === page ? "is-active" : ""} {...(n.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
-              {n.label}
-              <Icon name={n.external ? "arrowUpRight" : "arrow"} size={20} />
-            </a>
-          ))}
+          {NAV.map((n) => {
+            const isOpen = group === n.page;
+            return (
+              <div key={n.page} className={`mm-group ${isOpen ? "is-open" : ""} ${n.page === section ? "is-active" : ""}`}>
+                <button type="button" className="mm-group__head" aria-expanded={isOpen} aria-controls={`mm-${n.page}`} onClick={() => setGroup(isOpen ? null : n.page)}>
+                  <span>{n.label}</span>
+                  <Icon name={isOpen ? "minus" : "plus"} size={20} stroke={2} />
+                </button>
+                <div className="mm-group__links" id={`mm-${n.page}`} hidden={!isOpen}>
+                  {visible(n.children).map((c) => (
+                    <MenuLink key={c.label} item={c} onNewsletter={onNewsletter} onPick={() => setOpen(false)} />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </nav>
         <div className="mobile-menu__ctas">
           <Button href={JOIN_FREE} variant="turq">Join Free</Button>
@@ -305,7 +325,7 @@ export function Socials({ className = "" }) {
   );
 }
 
-export function Footer() {
+export function Footer({ onNewsletter }) {
   return (
     <footer className="site-footer">
       <div className="container">
@@ -313,36 +333,23 @@ export function Footer() {
           <div className="footer-top">
             <div className="footer-about">
               <img className="footer-logo" src="assets/logo/aoa-white.png" alt="Advantages of Age" width="220" height="82" />
-              <h3 className="footer-head">About Advantages of Age</h3>
               <p>{FOOTER.about} <a className="u-link" href="about.html">Read more</a></p>
+              <Button variant="turq" size="sm" icon="mail" onClick={onNewsletter} className="footer-newsletter">Get the newsletter</Button>
               <Socials />
             </div>
-            <div className="footer-col">
-              <h3 className="footer-head">Website</h3>
-              <ul>
-                {FOOTER.website.map((l) => (
-                  <li key={l.label}><a href={l.href}>{l.label}</a></li>
-                ))}
-              </ul>
-            </div>
-            <div className="footer-col">
-              <h3 className="footer-head">Support</h3>
-              <ul>
-                {FOOTER.support.map((l) => (
-                  <li key={l.label}><a href={l.href}>{l.label}</a></li>
-                ))}
-              </ul>
-            </div>
-            <div className="footer-badge" aria-hidden="true">
-              <RotatingBadge src="assets/logo/badge-white.png" />
-            </div>
+            {FOOTER.columns.map((col) => (
+              <div className="footer-col" key={col.title}>
+                <h3 className="footer-head">{col.title}</h3>
+                <ul>
+                  {visible(col.links).map((l) => (
+                    <li key={l.label}><MenuLink item={l} onNewsletter={onNewsletter} /></li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
           <div className="footer-bottom">
             <p>© 2026 Advantages of Age. All Rights Reserved</p>
-            <div className="footer-legal">
-              <a href="terms.html">Terms of Use</a>
-              <a href="privacy.html">Privacy Policy</a>
-            </div>
           </div>
         </div>
       </div>
@@ -352,38 +359,35 @@ export function Footer() {
 
 /* --------------------------------------------------------- Page hero */
 
-export function PageHero({ eyebrow, title, accent, sub, crumbs = [], tone = "turq", img, children }) {
+export function PageHero({ eyebrow, title, accent, sub, crumbs = [], img, children }) {
   return (
-    <section className={`page-hero page-hero--${tone}`}>
-      <div className="container">
-        <div className={`page-hero__card ${img ? "has-img" : ""}`}>
-          <div className="page-hero__text">
-            {crumbs.length > 0 && (
-              <nav className="crumbs" aria-label="Breadcrumb">
-                <a href="index.html">Home</a>
-                {crumbs.map((c, i) => (
-                  <React.Fragment key={i}>
-                    <span aria-hidden="true">/</span>
-                    {c.href ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}
-                  </React.Fragment>
-                ))}
-              </nav>
-            )}
-            {eyebrow && <Sticker tone="lime" tilt={-3}>{eyebrow}</Sticker>}
-            <h1 className="h1">
-              {title} {accent && <em>{accent}</em>}
-            </h1>
-            {sub && <p className="lead">{sub}</p>}
-            {children}
-          </div>
-          {img && (
-            <div className="page-hero__media">
-              <img src={img} alt="" />
-            </div>
+    <section className={`page-hero ${img ? "has-img" : ""}`}>
+      <div className="container page-hero__inner">
+        <div className="page-hero__text">
+          {crumbs.length > 0 && (
+            <nav className="crumbs" aria-label="Breadcrumb">
+              <a href="index.html">Home</a>
+              {crumbs.map((c, i) => (
+                <React.Fragment key={i}>
+                  <span aria-hidden="true">/</span>
+                  {c.href ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}
+                </React.Fragment>
+              ))}
+            </nav>
           )}
-          <span className="page-hero__shape page-hero__shape--a" aria-hidden="true" />
-          <span className="page-hero__shape page-hero__shape--b" aria-hidden="true" />
+          {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+          <h1 className="h1">
+            {title} {accent && <em>{accent}</em>}
+          </h1>
+          <span className="rule" aria-hidden="true" />
+          {sub && <p className="lead">{sub}</p>}
+          {children}
         </div>
+        {img && (
+          <div className="page-hero__media">
+            <img src={img} alt="" />
+          </div>
+        )}
       </div>
     </section>
   );
@@ -477,13 +481,26 @@ export function RichBlocks({ blocks }) {
 /* ----------------------------------------------------------- Layout */
 
 export function Layout({ page, children }) {
-  useReveal();
+  const [nl, setNl] = useState(false);
+  const openNewsletter = () => setNl(true);
+  // Pages render after load, so jump to #anchors (join.html#faq, about.html#press) ourselves
+  useEffect(() => {
+    const go = () => {
+      const el = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (!el) return;
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 110, behavior: "instant" });
+    };
+    const t = setTimeout(go, 60);
+    window.addEventListener("load", go, { once: true }); // again once images have sized the page
+    window.addEventListener("hashchange", go);
+    return () => { clearTimeout(t); window.removeEventListener("load", go); window.removeEventListener("hashchange", go); };
+  }, []);
   return (
     <>
-      <Header page={page} />
-      <div className="bg-blobs" aria-hidden="true"><span /><span /><span /><span /></div>
+      <Header page={page} onNewsletter={openNewsletter} />
       <main id="main">{children}</main>
-      <Footer />
+      <Footer onNewsletter={openNewsletter} />
+      <NewsletterModal open={nl} onClose={() => setNl(false)} />
     </>
   );
 }

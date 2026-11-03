@@ -38,6 +38,7 @@ export function Signup() {
   return (
     <AuthShell title="Create" accent="Account" eyebrow={label} img="assets/img/three-friends.jpg" crumbs={[{ label: "Membership", href: "join.html" }, { label: "Create Account" }]}>
       <p className="lead">{SIGNUP.sub}</p>
+      <p className="small">Not sure which plan is right? <a href="join.html">Compare plans</a></p>
       {done ? (
         <p className="form-status form-status--ok" role="status">Thanks for joining — check your inbox for your welcome email.</p>
       ) : (
@@ -115,7 +116,7 @@ export function Contact() {
   const [sent, setSent] = useState(false);
   return (
     <Layout page="contact">
-      <PageHero eyebrow={c.eyebrow} title="Get in" accent="Touch" crumbs={[{ label: "About Us", href: "about.html" }, { label: "Contact Us" }]} img="assets/img/portrait-scarf.jpg" tone="lime">
+      <PageHero eyebrow={c.eyebrow} title="Get in" accent="Touch" crumbs={[{ label: "About", href: "about.html" }, { label: "Contact" }]} img="assets/img/portrait-scarf.jpg" tone="lime">
         <p className="hero-tagline">{c.heading}</p>
         <p className="lead">{c.body}</p>
       </PageHero>
@@ -125,7 +126,7 @@ export function Contact() {
           <h2 className="h3 mb">{c.helpTitle}</h2>
           <div className="help-grid">
             {c.help.map((h, i) => (
-              <div key={h.title} className={`help help--${HELP_TONES[i]}`} data-reveal style={{ "--d": `${i * 60}ms` }}>
+              <div key={h.title} className={`help help--${HELP_TONES[i]}`}>
                 <span className="feature__icon"><Icon name={HELP_ICONS[i]} size={22} /></span>
                 <h3 className="h4">{h.title}</h3>
                 <p>{h.body}</p>
@@ -146,7 +147,7 @@ export function Contact() {
               <div className="side-card">
                 <h2 className="h4">{c.elsewhere}</h2>
                 <ul className="elsewhere">
-                  <li><a href={LINKS.substack} target="_blank" rel="noopener noreferrer"><Icon name="substack" size={18} /> Substack <Icon name="arrowUpRight" size={14} /></a></li>
+                  <li><a href={LINKS.magazine} target="_blank" rel="noopener noreferrer"><Icon name="substack" size={18} /> Magazine <Icon name="arrowUpRight" size={14} /></a></li>
                   <li><a href={LINKS.instagram} target="_blank" rel="noopener noreferrer"><Icon name="instagram" size={18} /> Instagram <Icon name="arrowUpRight" size={14} /></a></li>
                   <li><a href={LINKS.facebook} target="_blank" rel="noopener noreferrer"><Icon name="facebook" size={18} /> Facebook <Icon name="arrowUpRight" size={14} /></a></li>
                 </ul>
