@@ -12,7 +12,7 @@ function Flagships({ exclude, last }) {
         <SectionHead title={exclude ? <>More from <em>What's On</em></> : <>Flagship <em>moments</em></>} sub={exclude ? null : WHATS_ON.flagshipSub} />
         <div className={`moments ${items.length === 1 ? "moments--one" : ""}`}>
           {items.map((it, i) => (
-            <article key={it.title} className="moment">
+            <article key={it.title} className="moment fcard">
               <div className="moment__img"><img src={it.img} alt="" loading="lazy" /></div>
               <div className="moment__body">
                 {it.date && <p className="moment__date">{it.date}</p>}
@@ -188,11 +188,6 @@ export function Conference() {
         </div>
       </PageHero>
 
-      <section className="section section--tight">
-        <div className="container">
-          <Gallery items={c.gallery} />
-        </div>
-      </section>
 
       <section className="section">
         <div className="container">

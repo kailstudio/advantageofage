@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { HOME, ARTICLES, LISTINGS, LINKS, JOIN_FREE, JOIN_ORGS } from "../data.js";
-import { Layout, Button, ArrowLink, Icon, Avatar } from "../components.jsx";
+import { Layout, Button, ArrowLink, Icon, Avatar, Socials, CircleText } from "../components.jsx";
 
 /* Homepage — follows the "Website in action" concept in the AoA Living Brand
    System v4: hero · pathways · how it works · directory + why join ·
@@ -15,21 +15,41 @@ const PATHWAY_IMG = [
 
 function Hero() {
   const h = HOME.hero;
+  const faces = LISTINGS.filter((l) => l.img && !l.logo).slice(0, 5);
   return (
-    <section className="hero">
-      <div className="container hero__inner">
-        <div className="hero__text">
-          <p className="eyebrow">Advantages of Age</p>
-          <h1 className="display">Age with attitude<span className="dot">.</span></h1>
-          <span className="rule" aria-hidden="true" />
-          <p className="lead">{h.body}</p>
-          <div className="hero__ctas">
-            <Button href={JOIN_FREE} variant="turq">Join the movement</Button>
-            <a className="textlink" href={JOIN_ORGS}>List your organisation</a>
+    <section className="ehero ehero--glow">
+      <div className="glow" aria-hidden="true"><span /><span /><span /></div>
+      <div className="container">
+        <div className="ehero__body">
+          <div className="ehero__left">
+            <a className="pill pill--dark" href={JOIN_FREE}>Join the movement</a>
+            <h1 className="ehero__title">Age with<br />attitude<span className="dot">.</span></h1>
+            <form className="gsearch" action="directory.html" role="search">
+              <Icon name="sparkle" size={20} />
+              <label className="sr-only" htmlFor="hero-search">Search the directory</label>
+              <input id="hero-search" type="search" name="q" placeholder="Search people, events and organisations…" maxLength={80} />
+              <button type="submit" aria-label="Search the directory"><Icon name="arrow" size={20} stroke={2.2} /></button>
+            </form>
           </div>
-        </div>
-        <div className="hero__media">
-          <img src="assets/img/brand/hero-people.jpg" alt="Three Advantages of Age members: a man in a blue shirt, a woman in a red hat blowing bubbles, and a man in an orange jacket and beret" />
+          <CircleText />
+          <div className="ehero__right">
+            <p className="ehero__intro">{h.body}</p>
+            <div className="bento">
+              <div className="bento__photo"><img src="assets/img/brand/portrait-straw-hat.jpg" alt="" /></div>
+              <a className="bento__faces" href="directory.html">
+                <span className="avatar-row" aria-hidden="true">
+                  {faces.map((l) => <img key={l.slug} src={l.img} alt="" />)}
+                </span>
+                <span className="bento__link">Explore the directory <Icon name="arrowUpRight" size={18} stroke={2} /></span>
+              </a>
+              <div className="bento__stat">
+                <span className="bento__icon"><Icon name="people" size={22} /></span>
+                <strong>50+</strong>
+                <span>An age-positive community, free to join</span>
+              </div>
+            </div>
+            <a className="textlink" href={JOIN_ORGS}>List your organisation <Icon name="arrow" size={15} stroke={2.2} /></a>
+          </div>
         </div>
       </div>
     </section>
@@ -43,14 +63,14 @@ function Pathways() {
       <div className="container">
         <div className="section-head section-head--center">
           <div>
-            <p className="eyebrow">A welcoming community</p>
+            <p className="eyebrow"><span className="eyebrow__n">01</span> A welcoming community</p>
             <h2 className="h2">Choose how you <em>take part.</em></h2>
             <p className="lead">{p.sub}</p>
           </div>
         </div>
         <div className="pathways">
           {p.items.map((it, i) => (
-            <article key={it.title} className="pathway">
+            <article key={it.title} className="pathway fcard">
               <div className="pathway__img"><img src={PATHWAY_IMG[i]} alt="" loading="lazy" /></div>
               <div className="pathway__body">
                 <h3 className="h4">{it.title}</h3>
@@ -72,7 +92,7 @@ function HowItWorks() {
       <div className="container">
         <div className="section-head section-head--center">
           <div>
-            <p className="eyebrow">Simple to join</p>
+            <p className="eyebrow"><span className="eyebrow__n">02</span> Simple to join</p>
             <h2 className="h2">How it works<span className="dot">.</span></h2>
           </div>
         </div>
@@ -98,7 +118,7 @@ function DirectoryAndWhy() {
       <div className="container">
         <div className="pair">
           <div className="pair__panel pair__panel--turq">
-            <p className="eyebrow">Explore the community</p>
+            <p className="eyebrow"><span className="eyebrow__n">03</span> Explore the community</p>
             <h2 className="h2">More than a directory<span className="dot">.</span></h2>
             <p className="lead">{p.sub}</p>
             <div className="benefits">
@@ -115,7 +135,7 @@ function DirectoryAndWhy() {
             <Button href="directory.html" variant="dark">Explore the directory</Button>
           </div>
           <div className="pair__panel pair__panel--yellow">
-            <p className="eyebrow">Why be part of AofA?</p>
+            <p className="eyebrow"><span className="eyebrow__n">04</span> Why be part of AofA?</p>
             <h2 className="h2">A few good reasons<span className="dot">.</span></h2>
             <p className="lead">{w.sub}</p>
             <div className="why-inner">
@@ -134,27 +154,39 @@ function DirectoryAndWhy() {
   );
 }
 
+/* Profile card: framed photo, centred name, detail row, pill tags, stacked
+   ghost cards behind and a round tab on the bottom edge. */
 export function ListingCard({ listing, excerpt }) {
   const href = `profile.html?id=${listing.slug}`;
+  const isOrg = listing.type === "organisation";
+  const place = (listing.shortLocation || listing.location || "").split(",").slice(0, 2).join(",");
+  const tags = [isOrg ? "Organisation" : "AofA Member", listing.verified && "Verified", listing.offers ? `Offers (${listing.offers})` : null].filter(Boolean);
   return (
-    <article className="listing-card">
-      <a className="listing-card__media" href={href} tabIndex={-1} aria-hidden="true">
-        {listing.img && !listing.logo ? (
-          <img src={listing.img} alt="" loading="lazy" />
-        ) : (
-          <span className="listing-card__logo"><Avatar listing={listing} size={120} /></span>
-        )}
-        {listing.verified && <span className="glass-tag glass-tag--sm"><Icon name="verified" size={14} /> Verified</span>}
-      </a>
-      <div className="listing-card__body">
-        <p className="kicker">{listing.type === "organisation" ? "Organisation" : "AofA Member"}</p>
-        <h3 className="h3"><a href={href}>{listing.name}</a></h3>
-        <p className="listing-card__excerpt">{excerpt || listing.summary}</p>
-        {listing.shortLocation && (
-          <p className="meta"><Icon name="pin" size={16} /><span>{listing.shortLocation.split(",").slice(0, 2).join(",")}</span></p>
-        )}
-        <ArrowLink href={href}>View listing</ArrowLink>
+    <article className="pcard">
+      <div className="pcard__frame">
+        <a className="pcard__media" href={href} tabIndex={-1} aria-hidden="true">
+          {listing.img && !listing.logo ? (
+            <img src={listing.img} alt="" loading="lazy" />
+          ) : (
+            <span className="pcard__logo"><Avatar listing={listing} size={120} /></span>
+          )}
+        </a>
+        <div className="pcard__body">
+          <h3 className="pcard__name">
+            <a href={href}>{listing.name}</a>
+            {listing.verified && <span className="pcard__verified" title="Verified"><Icon name="verified" size={17} /><span className="sr-only"> (verified)</span></span>}
+          </h3>
+          <p className="pcard__meta">
+            {place && <span><Icon name="pin" size={15} /> {place}</span>}
+            <span><Icon name={isOrg ? "people" : "user"} size={15} /> {isOrg ? "Organisation" : "Member"}</span>
+          </p>
+          {excerpt && <p className="pcard__excerpt">{excerpt}</p>}
+          <ul className="pcard__tags">{tags.map((t) => <li key={t}>{t}</li>)}</ul>
+        </div>
       </div>
+      <a className="pcard__tab" href={href} aria-label={`View ${listing.name}'s listing`}>
+        <span className="pcard__tab-ring"><Icon name="arrowUpRight" size={20} stroke={2.2} /></span>
+      </a>
     </article>
   );
 }
@@ -167,7 +199,7 @@ function Community() {
       <div className="container">
         <div className="section-head">
           <div>
-            <p className="eyebrow">People are the brand</p>
+            <p className="eyebrow"><span className="eyebrow__n">05</span> People are the brand</p>
             <h2 className="h2">Meet the<br />community<span className="dot">.</span></h2>
             <p className="lead">{c.sub}</p>
           </div>
@@ -188,14 +220,14 @@ function Moments() {
       <div className="container">
         <div className="section-head section-head--center">
           <div>
-            <p className="eyebrow">The age revolution</p>
+            <p className="eyebrow"><span className="eyebrow__n">06</span> The age revolution</p>
             <h2 className="h2">More life. <em>More possibilities.</em></h2>
             <p className="lead">{m.sub}</p>
           </div>
         </div>
         <div className="moments">
           {m.items.map((it) => (
-            <article key={it.title} className="moment">
+            <article key={it.title} className="moment fcard">
               <div className="moment__img"><img src={it.img} alt="" loading="lazy" /></div>
               <div className="moment__body">
                 {it.date && <p className="moment__date">{it.date}</p>}
@@ -229,10 +261,10 @@ export function ArticleCard({ a, i = 0 }) {
 
 function Magazine() {
   return (
-    <section className="section section--tint">
+    <section className="section section--warm">
       <div className="container maglayout">
         <div className="magintro">
-          <p className="eyebrow" style={{ marginBottom: 0 }}>Magazine</p>
+          <p className="eyebrow" style={{ marginBottom: 0 }}><span className="eyebrow__n">07</span> Magazine</p>
           <h2 className="h2">A life in<br />progress<span className="dot">.</span></h2>
           <p className="lead">{HOME.magazine.sub}</p>
           <a className="textlink" href={LINKS.magazine} target="_blank" rel="noopener noreferrer">Read the magazine <Icon name="arrowUpRight" size={15} stroke={2.2} /></a>
@@ -244,32 +276,35 @@ function Magazine() {
 }
 
 function Closing() {
-  const f = HOME.final;
   const [done, setDone] = useState(false);
   return (
-    <section className="closing">
-      <div className="container closing__inner">
-        <div className="closing__text">
-          <p className="eyebrow">Stay connected</p>
-          <h2 className="display display--md">The best chapters are still unwritten<span className="dot">.</span></h2>
-          <p className="lead">{HOME.connected.body}</p>
-          {done ? (
-            <p className="form-status form-status--ok" role="status">Thank you — you're on the list.</p>
-          ) : (
-            <form className="signup" onSubmit={(e) => { e.preventDefault(); setDone(true); }}>
-              <label className="sr-only" htmlFor="closing-email">Email address</label>
-              <input id="closing-email" type="email" required autoComplete="email" placeholder="Your email address" maxLength={180} />
-              <Button type="submit" variant="turq">Subscribe</Button>
-            </form>
-          )}
-          <p className="signup-note">We respect your privacy. Unsubscribe at any time. <a className="u-link" href="privacy.html">Privacy policy</a></p>
-          <p className="closing__alt">
-            <a className="textlink" href={LINKS.facebookGroup} target="_blank" rel="noopener noreferrer">Join the Facebook group <Icon name="arrowUpRight" size={15} stroke={2.2} /></a>
-          </p>
+    <section className="gclose">
+      <div className="glow glow--warm" aria-hidden="true"><span /><span /><span /></div>
+      <div className="container">
+        <div className="gpanel">
+          <div className="gpanel__main">
+            <p className="eyebrow"><span className="eyebrow__n">08</span> Stay connected</p>
+            <h2 className="h2">The best chapters are still unwritten<span className="dot">.</span></h2>
+            <p className="lead">{HOME.connected.body}</p>
+            {done ? (
+              <p className="form-status form-status--ok" role="status">Thank you — you're on the list.</p>
+            ) : (
+              <form className="gsearch gsearch--email" onSubmit={(e) => { e.preventDefault(); setDone(true); }}>
+                <Icon name="mail" size={20} />
+                <label className="sr-only" htmlFor="closing-email">Email address</label>
+                <input id="closing-email" type="email" required autoComplete="email" placeholder="Your email address" maxLength={180} />
+                <button type="submit" aria-label="Subscribe to the newsletter"><Icon name="arrow" size={20} stroke={2.2} /></button>
+              </form>
+            )}
+            <p className="signup-note">We respect your privacy. Unsubscribe at any time. <a className="u-link" href="privacy.html">Privacy policy</a></p>
+          </div>
+          <div className="gpanel__side">
+            <img className="gpanel__photo" src="assets/img/brand/closing-hands.jpg" alt="" loading="lazy" />
+            <p className="gpanel__label">Join the conversation</p>
+            <Socials className="socials--glass" />
+            <a className="textlink" href={LINKS.facebookGroup} target="_blank" rel="noopener noreferrer">Facebook group <Icon name="arrowUpRight" size={15} stroke={2.2} /></a>
+          </div>
         </div>
-      </div>
-      <div className="closing__media" aria-hidden="true">
-        <img src="assets/img/brand/closing-hands.jpg" alt="" loading="lazy" />
       </div>
     </section>
   );

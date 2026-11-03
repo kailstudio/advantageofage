@@ -185,7 +185,11 @@ export function MenuLink({ item, onNewsletter, onPick, className = "" }) {
 }
 
 function NavItem({ item, active, onNewsletter }) {
+  // Click (or Enter/Space) pins the menu open until you click it again, click
+  // elsewhere or press Escape. Hovering previews it; after closing by click the
+  // preview stays off until the pointer leaves, so the click always "wins".
   const [open, setOpen] = useState(false);
+  const [muted, setMuted] = useState(false);
   const ref = useRef(null);
   const id = `menu-${item.page}`;
   useEffect(() => {
@@ -194,6 +198,7 @@ function NavItem({ item, active, onNewsletter }) {
     const onKey = (e) => {
       if (e.key !== "Escape") return;
       setOpen(false);
+      setMuted(true);
       ref.current?.querySelector(".nav-toggle")?.focus();
     };
     document.addEventListener("pointerdown", onDoc);
@@ -206,20 +211,19 @@ function NavItem({ item, active, onNewsletter }) {
   return (
     <div
       ref={ref}
-      className={`nav-item ${active ? "is-active" : ""} ${open ? "is-open" : ""}`}
+      className={`nav-item ${active ? "is-active" : ""} ${open ? "is-open" : ""} ${muted ? "is-muted" : ""}`}
+      onMouseLeave={() => setMuted(false)}
       onBlur={(e) => ref.current && !ref.current.contains(e.relatedTarget) && setOpen(false)}
     >
-      {item.href && (
-        <a className="nav-link" href={item.href} aria-current={active ? "true" : undefined}>{item.label}</a>
-      )}
       <button
         type="button"
-        className={`nav-toggle ${item.href ? "" : "nav-toggle--label"}`}
+        className="nav-toggle nav-toggle--label"
         aria-expanded={open}
         aria-controls={id}
-        onClick={() => setOpen(!open)}
+        onClick={() => { if (open) { setOpen(false); setMuted(true); } else { setOpen(true); setMuted(false); } }}
       >
-        {item.href ? <span className="sr-only">{item.label} menu</span> : item.label}
+        {item.label}
+        {active && <span className="sr-only"> (current section)</span>}
         <Icon name="chevron" size={15} stroke={2.2} />
       </button>
       <div className="nav-menu" id={id} hidden={!open}>
@@ -359,13 +363,29 @@ export function Footer({ onNewsletter }) {
 
 /* --------------------------------------------------------- Page hero */
 
+/* Static circular text badge — does not rotate (brandbook: no decorative motion) */
+let circleId = 0;
+export function CircleText({ text = "Age with attitude • Advantages of Age • Rethink ageing • ", className = "" }) {
+  const [id] = useState(() => `circle-text-${++circleId}`);
+  return (
+    <div className={`circle-text ${className}`} aria-hidden="true">
+      <svg viewBox="0 0 200 200">
+        <defs><path id={id} d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" /></defs>
+        <text textLength="485" lengthAdjust="spacing"><textPath href={`#${id}`}>{text}</textPath></text>
+      </svg>
+      <span className="circle-text__core"><Icon name="asterisk" size={34} stroke={2.4} /></span>
+    </div>
+  );
+}
+
 export function PageHero({ eyebrow, title, accent, sub, crumbs = [], img, children }) {
   return (
     <section className={`page-hero ${img ? "has-img" : ""}`}>
+      <div className="page-hero__glow" aria-hidden="true"><span /><span /><span /></div>
       <div className="container page-hero__inner">
         <div className="page-hero__text">
           {crumbs.length > 0 && (
-            <nav className="crumbs" aria-label="Breadcrumb">
+            <nav className="crumbs crumbs--glass" aria-label="Breadcrumb">
               <a href="index.html">Home</a>
               {crumbs.map((c, i) => (
                 <React.Fragment key={i}>
@@ -375,17 +395,21 @@ export function PageHero({ eyebrow, title, accent, sub, crumbs = [], img, childr
               ))}
             </nav>
           )}
-          {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+          {eyebrow && <p className="page-hero__eyebrow">{eyebrow}</p>}
           <h1 className="h1">
             {title} {accent && <em>{accent}</em>}
           </h1>
-          <span className="rule" aria-hidden="true" />
           {sub && <p className="lead">{sub}</p>}
           {children}
         </div>
         {img && (
-          <div className="page-hero__media">
-            <img src={img} alt="" />
+          <div className="page-hero__visual">
+            <div className="page-hero__frame"><img src={img} alt="" /></div>
+            <CircleText className="page-hero__badge" />
+            <div className="page-hero__chip" aria-hidden="true">
+              <img src="assets/logo/badge-turquoise.png" alt="" />
+              <span><strong>Advantages of Age</strong><small>Rethinking ageing since 2016</small></span>
+            </div>
           </div>
         )}
       </div>

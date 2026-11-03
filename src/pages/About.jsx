@@ -1,18 +1,55 @@
 import React from "react";
 import { ABOUT, CONTACT, LINKS } from "../data.js";
-import { Layout, PageHero, Button, Chip, Icon, SectionHead } from "../components.jsx";
+import { Layout, Button, Icon, SectionHead, CircleText } from "../components.jsx";
 
 const WHAT_ICONS = { "★": "star", "◆": "diamond", "✎": "pen", "♪": "music" };
 const TONES = ["turq", "pink", "lime", "blue"];
+
+function AboutHero() {
+  const [suzanne, rose] = ABOUT.founders.people;
+  return (
+    <section className="ahero">
+      <div className="glow" aria-hidden="true"><span /><span /><span /></div>
+      <div className="container ahero__inner">
+        <div className="ahero__text">
+          <nav className="crumbs crumbs--light" aria-label="Breadcrumb">
+            <a href="index.html">Home</a><span aria-hidden="true">/</span><span aria-current="page">About</span>
+          </nav>
+          <p className="pill pill--dark">{ABOUT.eyebrow}</p>
+          <h1 className="ahero__title">About<br /><em>Advantages</em><br /><em>of Age</em><span className="dot">.</span></h1>
+          <p className="ahero__lead">A social enterprise founded in 2016 by Suzanne Noble and Rose Rouse, to demand a different future for older people in an ageist culture.</p>
+          <div className="hero__ctas">
+            <Button href="#story" variant="dark" icon="arrow">Our story</Button>
+            <a className="textlink" href="contact.html">Get in touch <Icon name="arrow" size={15} stroke={2.2} /></a>
+          </div>
+          <ul className="ahero__facts">
+            <li><strong>2016</strong><span>Founded</span></li>
+            <li><strong>2</strong><span>Founders, one hot tub</span></li>
+            <li><strong>50+</strong><span>Community, free to join</span></li>
+          </ul>
+        </div>
+        <div className="ahero__visual">
+          {[suzanne, rose].map((f, i) => (
+            <figure key={f.name} className={`ahero__card ahero__card--${i ? "b" : "a"}`}>
+              <img src={f.img} alt={f.name} />
+              <figcaption className="ahero__tag"><strong>{f.name}</strong><small>{f.role}</small></figcaption>
+            </figure>
+          ))}
+          <CircleText className="ahero__badge" />
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function About() {
   const a = ABOUT;
   return (
     <Layout page="about">
-      <PageHero eyebrow={a.eyebrow} title="About" accent="Advantages of Age" crumbs={[{ label: "About" }]} img="assets/img/suzanne-rose.jpg" tone="pink" />
+      <AboutHero />
 
       {/* Story */}
-      <section className="section">
+      <section className="section" id="story">
         <div className="container">
           <div className="story">
             <div className="story__media">
